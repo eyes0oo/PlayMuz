@@ -1,0 +1,840 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PlayMuz</title>
+    <link rel="stylesheet" href="PLAYMUZ.css">
+    <link rel="icon" type="image/png" href="icon.png">
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&display=swap" rel="stylesheet"> 
+   <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<style>
+ body {
+    font-family: 'Montserrat', sans-serif;
+    background-color: #e8e8e8;
+    margin: 0;
+    padding: 0;
+}
+
+.main-content {
+    margin-left: 250px;
+    padding: 40px;
+    display: flex;
+    justify-content: center;
+    align-items: flex-start;
+    min-height: 100vh;
+}
+
+.player-wrapper {
+    display: flex;
+    gap: 40px;
+    background: #2a2a2a;
+    border-radius: 24px;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.25);
+    padding: 40px;
+    max-width: 900px;
+    width: 100%;
+    flex-wrap: wrap;
+}
+
+.player-card {
+    flex: 1;
+    min-width: 300px;
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.cover-art {
+    width: 260px;
+    height: 260px;
+    border-radius: 50%;
+    position: relative;
+    margin-bottom: 25px;
+    border: 6px solid #666666;
+    box-shadow: 
+        0 10px 30px rgba(0, 0, 0, 0.3), 
+        inset 0 0 0 2px #888888;
+    transition: box-shadow 0.3s ease;
+}
+
+.cover-art img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    border-radius: 50%;
+}
+
+.cover-art::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 45px;
+    height: 45px;
+    background-color: #2a2a2a;
+    border-radius: 50%;
+    border: 2px solid #aaaaaa;
+    z-index: 2;
+    box-shadow: inset 0 2px 4px rgba(0,0,0,0.3);
+}
+
+.cover-art.playing {
+    animation: spin 8s linear infinite;
+}
+
+@keyframes spin {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
+}
+
+.track-info h3 {
+    margin: 0 0 8px 0;
+    font-size: 22px;
+    font-weight: 700;
+    color: #e0e0e0;
+}
+
+.track-info p {
+    margin: 0 0 25px 0;
+    font-size: 15px;
+    color: #999999;
+    font-weight: 500;
+}
+
+.progress-container {
+    width: 100%;
+    height: 6px;
+    background: #1a1a1a;
+    border-radius: 3px;
+    cursor: pointer;
+    margin-bottom: 10px;
+    position: relative;
+}
+
+.progress-bar {
+    height: 100%;
+    background: linear-gradient(90deg, #888888 0%, #cccccc 100%);
+    border-radius: 3px;
+    width: 0%;
+    transition: width 0.1s linear;
+}
+
+.time-display {
+    display: flex;
+    justify-content: space-between;
+    width: 100%;
+    font-size: 12px;
+    color: #aaaaaa;
+    margin-bottom: 25px;
+    font-weight: 600;
+}
+
+.controls {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+}
+
+.ctrl-btn {
+    background: none;
+    border: none;
+    cursor: pointer;
+    color: #aaaaaa;
+    font-size: 24px;
+    transition: all 0.2s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+}
+
+.ctrl-btn:hover {
+    background-color: #444444;
+    color: #e0e0e0;
+}
+
+.play-btn {
+    width: 65px;
+    height: 65px;
+    background: linear-gradient(135deg, #b0b0b0 0%, #666666 100%);
+    color: white;
+    font-size: 28px;
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3);
+}
+
+.play-btn:hover {
+    background: linear-gradient(135deg, #999999 0%, #888888 100%);
+    color: white;
+    transform: scale(1.05);
+}
+
+.playlist-container {
+    flex: 1;
+    min-width: 300px;
+    border-left: 1px solid #555555;
+    padding-left: 30px;
+    display: flex;
+    flex-direction: column;
+}
+
+.playlist-container h4 {
+    margin-top: 0;
+    margin-bottom: 20px;
+    font-size: 18px;
+    font-weight: 700;
+    color: #e0e0e0;
+}
+
+#playlist-ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    overflow-y: auto;
+    max-height: 400px;
+}
+
+#playlist-ul::-webkit-scrollbar {
+    width: 6px;
+}
+#playlist-ul::-webkit-scrollbar-thumb {
+    background-color: #555555;
+    border-radius: 3px;
+}
+
+.playlist-item {
+    display: flex;
+    align-items: center;
+    padding: 12px 15px;
+    border-radius: 12px;
+    cursor: pointer;
+    transition: background 0.2s ease;
+    margin-bottom: 8px;
+}
+
+.playlist-item:hover {
+    background-color: #3a3a3a;
+}
+
+.playlist-item.active {
+    background-color: #3a3a3a;
+    border: 1px solid #1a1a1a;
+}
+
+.playlist-item.active .pl-title {
+    color: #cccccc;
+    font-weight: 700;
+}
+
+.pl-number {
+    font-size: 14px;
+    color: #888888;
+    width: 25px;
+    font-weight: 600;
+}
+
+.playlist-item.active .pl-number {
+    color: #333333;
+}
+
+.pl-info {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+}
+
+.pl-title {
+    font-size: 14px;
+    font-weight: 600;
+    color: #aaaaaa;
+    margin-bottom: 4px;
+}
+
+.pl-artist {
+    font-size: 12px;
+    color: #999999;
+}
+@media (max-width: 768px) {
+    #navig {
+        transform: translateX(-100%);
+        transition: transform 0.3s ease;
+    }
+    #navig.open {
+        transform: translateX(0);
+        box-shadow: 4px 0 30px rgba(0,0,0,0.4);
+    }
+}
+
+@media (max-width: 768px) {
+    .main-content {
+        margin-left: 0 !important;
+        padding: 16px !important;
+    }
+
+    .player-wrapper {
+        flex-direction: column !important;
+        gap: 20px !important;
+        padding: 18px !important;
+        max-width: 100% !important;
+        width: 100% !important;
+        border-radius: 20px !important;
+    }
+
+    .player-card {
+        min-width: 0 !important;
+        width: 100% !important;
+    }
+
+    .cover-art {
+        width: min(260px, 70vw) !important;
+        height: min(260px, 70vw) !important;
+        margin-bottom: 18px !important;
+        border-width: 5px !important;
+    }
+
+    .cover-art::after {
+        width: 17% !important;
+        height: 17% !important;
+        border-width: 2px !important;
+    }
+
+    .track-info h3 {
+        font-size: 18px !important;
+    }
+
+    .track-info p {
+        font-size: 13px !important;
+        margin-bottom: 18px !important;
+    }
+
+    .time-display {
+        margin-bottom: 18px !important;
+    }
+
+    .controls {
+        gap: 12px !important;
+    }
+
+    .ctrl-btn {
+        width: 44px !important;
+        height: 44px !important;
+        font-size: 20px !important;
+    }
+
+    .play-btn {
+        width: 58px !important;
+        height: 58px !important;
+        font-size: 24px !important;
+    }
+
+    .playlist-container {
+        min-width: 0 !important;
+        width: 100% !important;
+        border-left: none !important;
+        border-top: 1px solid #555555 !important;
+        padding-left: 0 !important;
+        padding-top: 18px !important;
+    }
+
+    #playlist-ul {
+        max-height: 320px !important;
+    }
+
+    .playlist-item {
+        padding: 10px 12px !important;
+    }
+
+
+    .nav-link2 {
+        width: 100% !important;
+        justify-content: center !important;
+        padding: 12px !important;
+        font-size: 15px !important;
+        margin-top: 10px;
+    }
+}
+
+@media (max-width: 420px) {
+    .player-wrapper {
+        padding: 14px !important;
+        border-radius: 16px !important;
+    }
+
+    .cover-art {
+        width: min(240px, 78vw) !important;
+        height: min(240px, 78vw) !important;
+    }
+
+    .track-info h3 {
+        font-size: 16px !important;
+    }
+
+    .ctrl-btn {
+        width: 40px !important;
+        height: 40px !important;
+        font-size: 18px !important;
+    }
+
+    .play-btn {
+        width: 52px !important;
+        height: 52px !important;
+        font-size: 22px !important;
+    }
+
+    #playlist-ul {
+        max-height: 260px !important;
+    }
+}
+
+.nav-link2 {
+    height: 10%;
+    width: 30%;
+    display: flex;
+    align-items: right;
+    gap: 15px;
+    padding: 14px 18px;
+    text-decoration: none;
+    color: #131313;
+    font-size: 16px;
+    font-weight: 600;
+    border-radius: 12px;
+    transition: all 0.3s ease;
+    background: linear-gradient(180deg, #b0b0b0 0%, #909090 100%);
+    border: 2px solid #707070;
+    box-shadow: 
+        0 3px 0 #606060,
+        inset 0 1px 0 rgba(255, 255, 255, 0.6);
+        
+}
+
+.nav-link2:hover {
+    background: linear-gradient(180deg, #c0c0c0 0%, #a0a0a0 100%);
+    color: #141414;
+    transform: translateX(5px);
+    box-shadow: 
+        0 3px 0 #606060,
+        inset 0 1px 0 rgba(255, 255, 255, 0.8),
+        0 0 15px rgba(200, 200, 200, 0.4);
+}
+
+.nav-link2.active {
+    color: #0e0e0e;
+    font-weight: 700;
+  
+    background: linear-gradient(135deg, 
+        #d0d0d0 0%, 
+        #e8e8e8 50%, 
+        #c0c0c0 100%);
+    border-color: #808080;
+    box-shadow: 
+        0 3px 0 #606060,
+        inset 0 1px 0 rgba(255, 255, 255, 0.9),
+        0 0 20px rgba(200, 200, 200, 0.6);
+}
+.back-buttons {
+    display: flex;
+    flex-direction: row;
+    gap: 12px;
+    margin-top: 16px;
+    width: 100%;
+}
+
+.back-buttons .nav-link2 {
+    flex: 1; 
+    width: auto !important; 
+    height: auto !important;
+    padding: 12px 16px !important;
+    text-align: center;
+    justify-content: center;
+    font-size: 14px !important;
+}
+
+@media (max-width: 480px) {
+    .back-buttons {
+        flex-direction: column;
+    }
+}
+</style>
+
+</head>
+<body>
+
+<div id="container">
+    
+    <button class="burger-btn" onclick="toggleMenu()">☰</button>
+
+    <nav id="navig" class="sidebar">
+        <div class="sidebar-header">
+            <a href="PLAYMUZ.HTML">
+                <img src="playmmuzlogo.png" alt="PlayMuz">
+            </a>
+        </div>
+        <div class="sidebar-menu">
+            <a href="PLAYMUZ.HTML" class="nav-link">
+                <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+                <span>Главная</span>
+            </a>
+           <a href="RECOMMENDATIONS.html" class="nav-link">
+                <svg class="nav-icon" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-6">
+                     <path stroke-linecap="round" stroke-linejoin="round" d="M11.48 3.499a.562.562 0 0 1 1.04 0l2.125 5.111a.563.563 0 0 0 .475.345l5.518.442c.499.04.701.663.321.988l-4.204 3.602a.563.563 0 0 0-.182.557l1.285 5.385a.562.562 0 0 1-.84.61l-4.725-2.885a.562.562 0 0 0-.586 0L6.982 20.54a.562.562 0 0 1-.84-.61l1.285-5.386a.562.562 0 0 0-.182-.557l-4.204-3.602a.562.562 0 0 1 .321-.988l5.518-.442a.563.563 0 0 0 .475-.345L11.48 3.5Z" />
+                    </svg>
+                <span>Рекомендации</span>
+            </a>
+            <div class="nav-dropdown-wrapper">
+    <a href="GENRES.html" class="nav-link">
+        <svg class="nav-icon" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-6">
+         <path stroke-linecap="round" stroke-linejoin="round" d="m9 9 10.5-3m0 6.553v3.75a2.25 2.25 0 0 1-1.632 2.163l-1.32.377a1.803 1.803 0 1 1-.99-3.467l2.31-.66a2.25 2.25 0 0 0 1.632-2.163Zm0 0V2.25L9 5.25v10.303m0 0v3.75a2.25 2.25 0 0 1-1.632 2.163l-1.32.377a1.803 1.803 0 1 1-.99-3.467l2.31-.66A2.25 2.25 0 0 0 9 15.553Z" />
+        </svg>
+        <span>Жанры</span>
+    </a>
+
+    <ul class="nav-submenu">
+        <li><a href="MUSIC.html#metal">Метал</a></li>
+        <li><a href="MUSIC.html#pop">Поп</a></li>
+        <li><a href="MUSIC.html#alternative">Альтернативная</a></li>
+        <li><a href="MUSIC.html#electronic">Электронная</a></li>
+        <li><a href="MUSIC.html#rock">Рок</a></li>
+        <li><a href="MUSIC.html#classical">Классика</a></li>
+         <li><a href="MUSIC.html#indie">Инди</a></li>
+    </ul>
+
+</div>
+            <a href="POPULAR.html" class="nav-link">
+                <svg class="nav-icon" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M15.362 5.214A8.252 8.252 0 0 1 12 21 8.25 8.25 0 0 1 6.038 7.047 8.287 8.287 0 0 0 9 9.601a8.983 8.983 0 0 1 3.361-6.867 8.21 8.21 0 0 0 3 2.48Z" /><path stroke-linecap="round" stroke-linejoin="round" d="M12 18a3.75 3.75 0 0 0 .495-7.468 5.99 5.99 0 0 0-1.925 3.547 5.975 5.975 0 0 1-2.133-1.001A3.75 3.75 0 0 0 12 18Z" /></svg>
+               <span>Видео-плейлисты</span>
+            </a>
+            <a href="FAVORITE.html" class="nav-link">
+                <svg class="nav-icon" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M21 8.25c0-2.485-2.099-4.5-4.688-4.5-1.935 0-3.597 1.126-4.312 2.733-.715-1.607-2.377-2.733-4.313-2.733C5.1 3.75 3 5.765 3 8.25c0 7.22 9 12 9 12s9-4.78 9-12Z" /></svg>
+                <span>Избранное</span>
+            </a>
+            <a href="ABOUT.html" class="nav-link">
+                <svg class="nav-icon" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M9.879 7.519c1.171-1.025 3.071-1.025 4.242 0 1.172 1.025 1.172 2.687 0 3.712-.203.179-.43.326-.67.442-.745.361-1.45.999-1.45 1.827v.75M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Zm-9 5.25h.008v.008H12v-.008Z" /></svg>
+                <span>О проекте</span>
+<a href="TEST.html" class="nav-link">
+                <svg class="nav-icon" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-6">
+  <path stroke-linecap="round" stroke-linejoin="round" d="M12 18v-5.25m0 0a6.01 6.01 0 0 0 1.5-.189m-1.5.189a6.01 6.01 0 0 1-1.5-.189m3.75 7.478a12.06 12.06 0 0 1-4.5 0m3.75 2.383a14.406 14.406 0 0 1-3 0M14.25 18v-.192c0-.983.658-1.823 1.508-2.316a7.5 7.5 0 1 0-7.517 0c.85.493 1.509 1.333 1.509 2.316V18" />
+</svg>
+                <span>Тест</span>
+            </a>
+            </a>
+            <a href="LOGIN.html" class="nav-link"><span>Вход</span></a>
+            <a href="REGISTER.html" class="nav-link"><span>Регистрация</span></a>
+        </div>
+   <div style="text-align: center; font-style: italic; font-size: 20px; color: #000000a4;">@PlayMuz 2026</div> 
+ </nav> 
+
+    <main class="main-content" style="margin-left: 30px; padding: 40px; display: flex; justify-content: center; align-items: flex-start; min-height: 100vh;">
+       
+    
+        <div class="player-wrapper" style="display: flex; gap: 40px; background: #2a2a2a; border-radius: 24px; box-shadow: 0 20px 60px rgba(0,0,0,0.25); padding: 40px; max-width: 900px; width: 100%; flex-wrap: wrap;">
+            
+            <div class="player-card" style="flex: 1; min-width: 300px; text-align: center; display: flex; flex-direction: column; align-items: center;">
+                <div class="cover-art" id="coverArt" style="width: 260px; height: 260px; border-radius: 50%; position: relative; margin-bottom: 25px; border: 6px solid #666; box-shadow: 0 10px 30px rgba(0,0,0,0.3), inset 0 0 0 2px #888; transition: box-shadow 0.3s ease;">
+                    <img src="https://via.placeholder.com/260" alt="cover" id="coverImg" style="width: 100%; height: 100%; object-fit: cover; border-radius: 50%;">
+                    <div style="content: ''; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 45px; height: 45px; background-color: #2a2a2a; border-radius: 50%; border: 2px solid #aaa; z-index: 2; box-shadow: inset 0 2px 4px rgba(0,0,0,0.3);"></div>
+                </div>
+                
+                <div class="track-info">
+                    <h3 id="trackTitle" style="margin: 0 0 8px 0; font-size: 22px; font-weight: 700; color: #e0e0e0;">Выберите трек</h3>
+                    <p id="trackArtist" style="margin: 0 0 25px 0; font-size: 15px; color: #999; font-weight: 500;">—</p>
+                </div>
+
+                <div class="progress-container" id="progressContainer" style="width: 100%; height: 6px; background: #1a1a1a; border-radius: 3px; cursor: pointer; margin-bottom: 10px; position: relative;">
+                    <div class="progress-bar" id="progressBar" style="height: 100%; background: linear-gradient(90deg, #888 0%, #ccc 100%); border-radius: 3px; width: 0%; transition: width 0.1s linear;"></div>
+                </div>
+                
+                <div class="time-display" style="display: flex; justify-content: space-between; width: 100%; font-size: 12px; color: #aaa; margin-bottom: 25px; font-weight: 600;">
+                    <span id="currentTime">0:00</span>
+                    <span id="duration">0:00</span>
+                </div>
+
+                <div class="controls" style="display: flex; align-items: center; gap: 20px;">
+                    <button class="ctrl-btn" id="prevBtn" style="background: none; border: none; cursor: pointer; color: #aaa; font-size: 24px; width: 50px; height: 50px; border-radius: 50%;">⏮</button>
+                    <button class="ctrl-btn play-btn" id="playBtn" style="width: 65px; height: 65px; background: linear-gradient(135deg, #b0b0b0 0%, #666 100%); color: white; font-size: 28px; border: none; border-radius: 50%; cursor: pointer; box-shadow: 0 8px 20px rgba(0,0,0,0.3);">▶</button>
+                    <button class="ctrl-btn" id="nextBtn" style="background: none; border: none; cursor: pointer; color: #aaa; font-size: 24px; width: 50px; height: 50px; border-radius: 50%;">⏭</button>
+                </div>
+            </div>
+
+            <div class="playlist-container" style="flex: 1; min-width: 300px; border-left: 1px solid #555; padding-left: 30px; display: flex; flex-direction: column;">
+                <h4 id="playlistTitle" style="margin-top: 0; margin-bottom: 20px; font-size: 18px; font-weight: 700; color: #e0e0e0;">Плейлист</h4>
+                <ul id="playlist-ul" style="list-style: none; padding: 0; margin: 0; overflow-y: auto; max-height: 400px;"></ul>
+            
+<div class="back-buttons">
+    <a href="GENRES.html" class="nav-link2">   
+        <span>Назад к жанрам</span>
+    </a>
+    <a href="PLAYMUZ.html" class="nav-link2">   
+        <span>Назад в главную</span>
+    </a>
+</div>
+            </div>
+        </div>
+    
+             </main>
+
+    <audio id="audio"></audio>
+
+</div>
+
+<script>
+const allTracks = [
+    // Metal
+    { title: " Can I Play With Madness", artist: "Iron Maiden", genre: "metal", src: "GENRES_SONGS/metal/Iron Maiden - Can I Play With Madness (hitmos.fm).mp3", cover: "disks/cd disk (3).jpg" },
+    { title: "Wrathchild", artist: "Iron Maiden", genre: "metal", src: "GENRES_SONGS/metal/Iron Maiden - Wrathchild (hitmos.fm).mp3", cover: "disks/cd disk (3).jpg" },
+    { title: "Damage Case", artist: "Metallica", genre: "metal", src: "GENRES_SONGS/metal/Metallica - Damage Case (hitmos.fm).mp3", cover: "disks/cd disk (3).jpg" },
+    { title: "So What", artist: "Metallica", genre: "metal", src: "GENRES_SONGS/metal/Metallica - So What (hitmos.fm).mp3", cover: "disks/cd disk (3).jpg" },
+    { title: "Du hast", artist: "Rammstein", genre: "metal", src: "GENRES_SONGS/metal/Rammstein - Du hast (hitmos.fm).mp3", cover: "disks/cd disk (3).jpg" },
+    { title: "Was Ich Liebe", artist: "Rammstein", genre: "metal", src: "GENRES_SONGS/metal/Rammstein - Was Ich Liebe (hitmos.fm).mp3", cover: "disks/cd disk (3).jpg" },
+    { title: "Diluted", artist: "Slipknot", genre: "metal", src: "GENRES_SONGS/metal/Slipknot - Diluted (hitmos.fm).mp3", cover: "disks/cd disk (3).jpg" },
+    { title: "Eyeless", artist: "Slipknot", genre: "metal", src: "GENRES_SONGS/metal/Slipknot - Eyeless (hitmos.fm).mp3", cover: "disks/cd disk (3).jpg" },
+    
+    
+    // PoP
+    { title: " Afterglow", artist: "Ed Sheeran", genre: "pop", src: "GENRES_SONGS/pop/Ed Sheeran - Afterglow (hitmos.fm).mp3", cover: "disks/cd disk (1).jpg" },
+    { title: "Collide ", artist: "Ed Sheeran", genre: "pop", src: "GENRES_SONGS/pop/Ed Sheeran - Collide (hitmos.fm).mp3", cover: "disks/cd disk (1).jpg" },
+    { title: " Poker Face", artist: "Lady Gaga ", genre: "pop", src: "GENRES_SONGS/pop/Lady Gaga - Poker Face (hitmos.fm).mp3", cover: "disks/cd disk (1).jpg" },
+    { title: "Scheibe", artist: "Lady Gaga ", genre: "pop", src: "GENRES_SONGS/pop/Lady Gaga - Scheibe (hitmos.fm).mp3", cover: "disks/cd disk (1).jpg" },
+    { title: " Billie Jean", artist: "Michael Jackson", genre: "pop", src: "GENRES_SONGS/pop/Michael Jackson - Billie Jean (hitmos.fm).mp3", cover: "disks/cd disk (1).jpg" },
+
+   // ROCK
+    { title: "Princes Of the Universe", artist: "Queen", genre: "rock", src: "GENRES_SONGS/rock/Queen - Princes Of The Universe (hitmos.fm).mp3", cover: "disks/cd disk (4).jpg" },
+     { title: "The Miracle", artist: "Queen", genre: "rock", src: "GENRES_SONGS/rock/Queen - The Miracle (hitmos.fm).mp3", cover: "disks/cd disk (4).jpg" },
+    { title: "Anyways", artist: "Arctic Monkeys", genre: "rock", src: "GENRES_SONGS/rock/Arctic Monkeys - Anyways (hitmos.fm).mp3", cover: "disks/cd disk (4).jpg" },
+     { title: "Do I Know You", artist: "Arctic Monkeys", genre: "rock", src: "GENRES_SONGS/rock/Arctic Monkeys - Do I Wanna Know_ (hitmos.fm).mp3", cover: "disks/cd disk (4).jpg" },
+    
+    //UNDERTALE 
+    {title: "Fallen_Down", artist:"Toby Fox", genre:"undertale", src:"Undertale ost/Toby_Fox_-_Fallen_Down_64962739.mp3", cover: "Undertale ost/Undertale Soundtrack It's Showtime!.jpg"},
+    {title: "Undertale", artist:"Toby Fox", genre:"undertale", src:"Undertale ost/Toby_Fox_-_Undertale_64962827.mp3", cover: "Undertale ost/Undertale Soundtrack It's Showtime!.jpg"},
+    {title: "sans", artist:"Toby Fox", genre:"undertale", src:"Undertale ost/Toby_Fox_-_sans_64962755.mp3", cover: "Undertale ost/Undertale Soundtrack It's Showtime!.jpg"},
+    {title: "tem shop", artist:"Toby Fox", genre:"undertale", src:"Undertale ost/Toby_Fox_-_Tem_Shop_64962791.mp3", cover: "Undertale ost/Undertale Soundtrack It's Showtime!.jpg"},
+    {title: "Spider Dance", artist:"Toby Fox", genre:"undertale", src:"Undertale ost/Toby_Fox_-_Spider_Dance_64962807.mp3", cover: "Undertale ost/Undertale Soundtrack It's Showtime!.jpg"},
+    {title: "CORE", artist:"Toby Fox", genre:"undertale", src:"Undertale ost/Toby_Fox_-_CORE_64962819.mp3", cover: "Undertale ost/Undertale Soundtrack It's Showtime!.jpg"}, 
+    {title: "ASGORE", artist:"Toby Fox", genre:"undertale", src:"Undertale ost/Toby_Fox_-_ASGORE_79492574.mp3", cover: "Undertale ost/Undertale Soundtrack It's Showtime!.jpg"},
+    {title: "His Theme", artist:"Toby Fox", genre:"undertale", src:"Undertale ost/Toby_Fox_-_His_Theme_64962852.mp3", cover: "Undertale ost/Undertale Soundtrack It's Showtime!.jpg"},
+    {title: "Finale", artist:"Toby Fox", genre:"undertale", src:"Undertale ost/Toby_Fox_-_Finale_64962839.mp3", cover: "Undertale ost/Undertale Soundtrack It's Showtime!.jpg"},
+    {title: "Here We Are",artist:"Toby Fox", genre:"undertale",src:"Undertale ost/Toby_Fox_-_Here_We_Are_64962842.mp3", cover: "Undertale ost/Undertale Soundtrack It's Showtime!.jpg"},
+   
+    //Ost
+     { title: "Poem Panic!", artist: "DDLC | Team Salvato", genre: "soundtracks", src: "GENRES_SONGS/ost/1-06. Poem Panic!.mp3", cover: "disks/cd disk (13).jpg" },
+     { title: "Malo Mart", artist: "Zelda: Twilight Princess", genre: "soundtracks", src: "GENRES_SONGS/ost/Toru Minegishi, Asuka Ohta - Malo Mart (hitmos.fm).mp3", cover: "disks/cd disk (13).jpg" }, 
+     { title: "Playing Forever", artist: "Omori", genre: "soundtracks", src: "GENRES_SONGS/ost/Omori - Playing Forever.mp3", cover: "disks/cd disk (13).jpg" },
+    { title: "Inside The Castle Walls", artist: "Super Mario 64", genre: "soundtracks", src: "GENRES_SONGS/ost/07. Inside The Castle Walls.mp3", cover: "disks/cd disk (13).jpg" },
+    { title: "Duet", artist: "Omori", genre: "soundtracks", src: "GENRES_SONGS/ost/Omori - Duet.mp3", cover: "disks/cd disk (13).jpg" },
+    { title: "General Release", artist: "buckshot roulette ost | Mikhail Klubnikov", genre: "soundtracks", src: "GENRES_SONGS/ost/buckshot_roulette_02. General Release.mp3", cover: "disks/cd disk (13).jpg" },
+    { title: "Pianissimo Epilogue", artist: "Silent Hill 2 ost", genre: "soundtracks", src: "GENRES_SONGS/ost/29. Pianissimo Epilogue.mp3", cover: "disks/cd disk (13).jpg" },
+     // alt
+     { title: "Prove Yourself", artist: "Radiohead", genre: "alternative", src: "GENRES_SONGS/alt/Radiohead - Prove Yourself (hitmos.fm).mp3", cover: "disks/cd disk (8).jpg" },
+     { title: "Drain You", artist: "Nirvana", genre: "alternative", src: "GENRES_SONGS/alt/Nirvana - Drain You.mp3", cover: "disks/cd disk (8).jpg" },
+     { title: "Something in the way", artist: "Nirvana", genre: "alternative", src: "GENRES_SONGS/alt/Nirvana - Something In The Way.mp3", cover: "disks/cd disk (8).jpg" },
+     { title: "Hysteria", artist: "Muse", genre: "alternative", src: "GENRES_SONGS/alt/Muse - Hysteria (hitmos.fm).mp3", cover: "disks/cd disk (8).jpg" },
+     { title: "Supermassive Black Hole", artist: "Muse", genre: "alternative", src: "GENRES_SONGS/alt/Muse - Supermassive Black Hole (hitmos.fm).mp3", cover: "disks/cd disk (8).jpg" },
+
+     // electronic
+     { title: "Raindrops", artist: "Basement Jaxx", genre: "electronic", src: "GENRES_SONGS/electro/Basement Jaxx - Raindrops (hitmos.fm).mp3", cover: "disks/cd disk (7).jpg" },
+     { title: "Romeo", artist: "Basement Jaxx", genre: "electronic", src: "GENRES_SONGS/electro/Basement Jaxx - Romeo (hitmos.fm).mp3", cover: "disks/cd disk (7).jpg" },
+     { title: " Where's Your Head At ", artist: "Basement Jaxx", genre: "electronic", src: "GENRES_SONGS/electro/Basement Jaxx - Where's Your Head At (hitmos.fm).mp3", cover: "disks/cd disk (7).jpg" },
+     { title: "Seveteen", artist: "Ladytron", genre: "electronic", src: "GENRES_SONGS/electro/Ladytron - Seventeen (hitmos.fm).mp3", cover: "disks/cd disk (7).jpg" },
+     { title: "Ghost", artist: "Machine Girl", genre: "electronic", src: "GENRES_SONGS/electro/Machine Girl - Ghost (hitmos.fm).mp3", cover: "disks/cd disk (7).jpg" },
+    //Indie
+     { title: "Gnaw", artist: "Alex G", genre: "indie", src: "GENRES_SONGS/indie/Alex G - Gnaw (hitmos.fm).mp3", cover: "disks/cd disks2 (2).jpg" },
+     { title: "Waiting for you", artist: "Alex G", genre: "indie", src: "GENRES_SONGS/indie/Alex G - Waiting for You (hitmos.fm).mp3", cover: "disks/cd disks2 (2).jpg" },
+     { title: "Treehouse", artist: "Alex G", genre: "indie", src: "GENRES_SONGS/indie/Alex_G_Emily_Yacina_-_Treehouse_(musmore.org).mp3", cover: "disks/cd disks2 (2).jpg" },
+     { title: "Nobody", artist: "Mitski", genre: "indie", src: "GENRES_SONGS/indie/Mitski - Nobody (hitmos.fm).mp3", cover: "disks/cd disks2 (2).jpg" },
+     { title: "Washing Machine Heart", artist: "Mitski", genre: "indie", src: "GENRES_SONGS/indie/Mitski - Washing Machine Heart (hitmos.fm).mp3", cover: "disks/cd disks2 (2).jpg" },
+     { title: "Hate Yourself", artist: "Tv girl", genre: "indie", src: "GENRES_SONGS/indie/TV Girl - Hate Yourself (hitmos.fm).mp3", cover: "disks/cd disks2 (2).jpg" },
+     { title: "Loving Machine", artist: "Tv girl", genre: "indie", src: "GENRES_SONGS/indie/TV Girl - Loving Machine (hitmos.fm).mp3", cover: "disks/cd disks2 (2).jpg" },
+    
+    
+     // Lo-fi
+     { title: "lo-fi-dreamers", artist: "lo-fi man", genre: "lofi", src: "GENRES_SONGS/lo-fi/Lo-Fi-Man-—-Dreamers-_www.lightaudio.ru_.mp3", cover: "disks/cd disk (12).jpg" },
+    { title: "LO-FI", artist: "lofi girl", genre: "lofi", src: "GENRES_SONGS/lo-fi/Lofi-Girl-—-LO-FI-_4-_www.lightaudio.ru_.mp3", cover: "disks/cd disk (12).jpg" },
+     { title: "lo-fi-chill", artist: "lo-fi", genre: "lofi", src: "GENRES_SONGS/lo-fi/lo-fi-child-—-chill-studie-_www.lightaudio.ru_.mp3", cover: "disks/cd disk (12).jpg" },
+  
+   // Classical
+    { title: "Лебединое озеро", artist: "Пётр Ильич Чайковский ", genre: "classical", src: "GENRES_SONGS/classical/Пётр Ильич Чайковский - Лебединое озеро (hitmos.fm).mp3", cover: "disks/cd disks1 (1).jpg" },
+    { title: "Serenata Para Cuerdas En Do Mayor Op.48 As En Mi", artist: "Antonin Dvorak", genre: "classical", src: "GENRES_SONGS/classical/Antonin Dvorak - Serenata Para Cuerdas En Do Mayor Op.48 As En Mi (hitmos.fm).mp3", cover: "disks/cd disks1 (1).jpg" },
+    { title: " Bizet_ Carmen - Prelude", artist: "Berliner Philharmoniker and Herbert von Karajan, Georges Bizet", genre: "classical", src: "GENRES_SONGS/classical/Berliner Philharmoniker and Herbert von Karajan, Georges Bizet - Bizet_ Carmen - Prelude (hitmos.fm).mp3", cover: "disks/cd disks1 (1).jpg" },
+    { title: "Sylvia Pizzicato", artist: "Clement Philibert", genre: "classical", src: "GENRES_SONGS/classical/Clement Philibert - Sylvia Pizzicato (hitmos.fm).mp3", cover: "disks/cd disks1 (1).jpg" },
+    { title: "Bagatela En Si Menor Op.126.4", artist: "Ludwig van Beethoven ", genre: "classical", src: "GENRES_SONGS/classical/Ludwig van Beethoven - Bagatela En Si Menor Op.126.4 (hitmos.fm).mp3", cover: "disks/cd disks1 (1).jpg" },
+    { title: " Фантазия ре минор", artist: "Mikhail Mordvinov", genre: "classical", src: "GENRES_SONGS/classical/Mikhail Mordvinov - Фантазия ре минор (hitmos.fm).mp3", cover: "disks/cd disks1 (1).jpg" },
+    { title: "Rondo Pequeña Serenata Nocturna", artist: "Wolfgang Amadeus Mozart", genre: "classical", src: "GENRES_SONGS/classical/Wolfgang Amadeus Mozart - Rondo Pequeña Serenata Nocturna (hitmos.fm).mp3", cover: "disks/cd disks1 (1).jpg" },
+];
+
+const genreNames = {
+    metal: " Metal Playlist",
+    rock: " Rock Playlist",
+    pop: "Pop Playlist",
+    soundtracks: " Soundtracks Playlist",
+    alternative: " Alternative Playlist",
+    electronic: " Electronic Playlist",
+    lofi: " Lo-fi Playlist",
+    indie: "Indie Playlist",
+    classical: " Classical Playlist",
+    all: " Все треки",
+    Undertale: "Undertale Ost",
+};
+
+let currentPlaylist = [];
+let currentIndex = 0;
+let isPlaying = false;
+
+const audio = document.getElementById('audio');
+const coverImg = document.getElementById('coverImg');
+const coverArt = document.getElementById('coverArt');
+const trackTitle = document.getElementById('trackTitle');
+const trackArtist = document.getElementById('trackArtist');
+const playlistUl = document.getElementById('playlist-ul');
+const playlistTitle = document.getElementById('playlistTitle');
+const progressBar = document.getElementById('progressBar');
+const progressCont = document.getElementById('progressContainer');
+const currentTimeEl = document.getElementById('currentTime');
+const durationEl = document.getElementById('duration');
+const playBtn = document.getElementById('playBtn');
+const prevBtn = document.getElementById('prevBtn');
+const nextBtn = document.getElementById('nextBtn');
+
+function initPlayer() {
+    const hash = window.location.hash.replace('#', '') || 'all';
+
+    if (hash === 'random') {
+        currentPlaylist = [...allTracks]; 
+        currentIndex = Math.floor(Math.random() * currentPlaylist.length);
+        
+        playlistTitle.textContent = "🎲 Случайный трек";
+        renderPlaylist();
+        loadTrack(currentIndex, true); 
+        return; 
+    }
+    currentPlaylist = hash === 'all' ? [...allTracks] : allTracks.filter(t => t.genre === hash);
+    currentIndex = 0;
+    
+    playlistTitle.textContent = genreNames[hash] || "Плейлист";
+    renderPlaylist();
+    
+    if (currentPlaylist.length > 0) {
+        loadTrack(0, false); 
+    } else {
+        trackTitle.textContent = "Треки не найдены";
+        trackArtist.textContent = "—";
+    }
+}
+function renderPlaylist() {
+    playlistUl.innerHTML = '';
+    currentPlaylist.forEach((track, i) => {
+        const li = document.createElement('li');
+        li.className = 'playlist-item' + (i === currentIndex ? ' active' : '');
+        li.style.cssText = "display: flex; align-items: center; padding: 12px 15px; border-radius: 12px; cursor: pointer; transition: background 0.2s ease; margin-bottom: 8px; background: " + (i === currentIndex ? "#3a3a3a" : "transparent") + ";";
+        li.innerHTML = `
+            <span style="font-size: 14px; color: #888; width: 25px; font-weight: 600;">${i + 1}</span>
+            <div style="flex: 1; display: flex; flex-direction: column;">
+                <span style="font-size: 14px; font-weight: 600; color: ${i === currentIndex ? '#ccc' : '#aaa'}; margin-bottom: 4px;">${track.title}</span>
+                <span style="font-size: 12px; color: #999;">${track.artist}</span>
+            </div>
+        `;
+        li.addEventListener('click', () => {
+            currentIndex = i;
+            loadTrack(i, true);
+        });
+        playlistUl.appendChild(li);
+    });
+}
+
+function loadTrack(index, autoplay) {
+    if (index < 0 || index >= currentPlaylist.length) return;
+    const track = currentPlaylist[index];
+    
+    audio.src = track.src;
+    coverImg.src = track.cover;
+    trackTitle.textContent = track.title;
+    trackArtist.textContent = track.artist;
+    
+    renderPlaylist();
+    
+    if (autoplay) {
+        audio.play().then(() => {
+            isPlaying = true;
+            playBtn.textContent = '⏸';
+            coverArt.style.animation = "spin 8s linear infinite";
+        }).catch(e => console.log("Autoplay blocked:", e));
+    } else {
+        isPlaying = false;
+        playBtn.textContent = '▶';
+        coverArt.style.animation = "none";
+    }
+}
+
+playBtn.addEventListener('click', () => {
+    if (currentPlaylist.length === 0) return;
+    if (isPlaying) {
+        audio.pause();
+        playBtn.textContent = '▶';
+        coverArt.style.animation = "none";
+    } else {
+        audio.play();
+        playBtn.textContent = '⏸';
+        coverArt.style.animation = "spin 8s linear infinite";
+    }
+    isPlaying = !isPlaying;
+});
+
+prevBtn.addEventListener('click', () => {
+    if (currentPlaylist.length === 0) return;
+    currentIndex = (currentIndex - 1 + currentPlaylist.length) % currentPlaylist.length;
+    loadTrack(currentIndex, true);
+});
+
+nextBtn.addEventListener('click', () => {
+    if (currentPlaylist.length === 0) return;
+    currentIndex = (currentIndex + 1) % currentPlaylist.length;
+    loadTrack(currentIndex, true);
+});
+
+audio.addEventListener('ended', () => {
+    currentIndex = (currentIndex + 1) % currentPlaylist.length;
+    loadTrack(currentIndex, true);
+});
+
+audio.addEventListener('timeupdate', () => {
+    if (audio.duration) {
+        const pct = (audio.currentTime / audio.duration) * 100;
+        progressBar.style.width = pct + '%';
+        currentTimeEl.textContent = formatTime(audio.currentTime);
+        durationEl.textContent = formatTime(audio.duration);
+    }
+});
+
+progressCont.addEventListener('click', (e) => {
+    const rect = progressCont.getBoundingClientRect();
+    const pct = (e.clientX - rect.left) / rect.width;
+    if (audio.duration) audio.currentTime = pct * audio.duration;
+});
+
+function formatTime(sec) {
+    const m = Math.floor(sec / 60);
+    const s = Math.floor(sec % 60);
+    return `${m}:${s.toString().padStart(2, '0')}`;
+}
+
+const style = document.createElement('style');
+style.innerHTML = `@keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }`;
+document.head.appendChild(style);
+
+window.addEventListener('hashchange', initPlayer);
+
+initPlayer();
+function toggleMenu() {
+    document.getElementById('navig').classList.toggle('open');
+}
+</script>
+<script>
+function toggleMenu() {
+    document.getElementById('navig').classList.toggle('open');
+}
+</script>
+
+</body>
+</html>

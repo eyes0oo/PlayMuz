@@ -1,0 +1,529 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PlayMuz</title>
+    <link rel="stylesheet" href="PLAYMUZ.css">
+    <link rel="icon" type="image.png" href="icon.png">
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+<style>
+
+.quiz-page {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    padding: 20px;
+    background: radial-gradient(ellipse at center, #242424 0%, #737374 100%);
+    position: relative;
+    overflow: hidden;
+}
+
+.quiz-page::before {
+    content: '';
+    position: absolute;
+    top: -50%;
+    left: -50%;
+    width: 200%;
+    height: 200%;
+    background: conic-gradient(
+        from 0deg,
+        transparent 0deg,
+        rgba(255, 182, 213, 0.03) 60deg,
+        rgba(136, 211, 206, 0.03) 120deg,
+        rgba(176, 176, 200, 0.03) 180deg,
+        rgba(200, 170, 255, 0.03) 240deg,
+        transparent 300deg
+    );
+    animation: cdShine 20s linear infinite;
+    pointer-events: none;
+}
+
+@keyframes cdShine {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
+}
+
+.quiz-container {
+    background: linear-gradient(145deg, #757577 0%, #cfcfcf 100%);
+    border-radius: 20px;
+    padding: 40px;
+    max-width: 600px;
+    width: 100%;
+    text-align: center;
+    box-shadow: 
+        0 15px 40px rgba(138, 134, 134, 0.5),
+        inset 0 1px 0 rgba(161, 160, 160, 0.05);
+    border: 1px solid rgba(176, 176, 190, 0.15);
+    position: relative;
+    z-index: 1;
+}
+
+.quiz-screen {
+    display: none;
+    animation: fadeIn 0.5s ease;
+}
+
+.quiz-screen.active {
+    display: block;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+.quiz-icon {
+    font-size: 4rem;
+    margin-bottom: 20px;
+    filter: drop-shadow(0 0 15px rgba(224, 224, 224, 0.3));
+}
+
+.quiz-container h2 {
+    color: #292929;
+    font-size: 1.8rem;
+    margin-bottom: 15px;
+    font-weight: 600;
+    letter-spacing: 0.5px;
+}
+
+.quiz-container p {
+    color: #383838;
+    font-size: 1.1rem;
+    line-height: 1.6;
+    margin-bottom: 30px;
+}
+
+
+.quiz-progress {
+    width: 100%;
+    height: 6px;
+    background: rgba(176, 176, 190, 0.15);
+    border-radius: 3px;
+    margin-bottom: 30px;
+    overflow: hidden;
+}
+
+.quiz-progress-bar {
+    height: 100%;
+    width: 0%;
+    background: linear-gradient(
+        90deg,
+        #e9a9a9 0%,   
+        #e7ba95 30%,  
+        #eee3b1 60%,   
+        #a6c4a6 100%   
+    );
+    transition: width 0.4s ease;
+    box-shadow: 0 0 10px rgba(136, 211, 206, 0.4);
+}
+
+
+
+.quiz-options {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.quiz-option-btn {
+    background: rgba(175, 175, 175, 0.192);
+    color: #000000;
+    border: 1px solid rgba(176, 176, 190, 0.2);
+    padding: 15px 20px;
+    border-radius: 12px;
+    font-size: 1rem;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    text-align: left;
+    font-family: 'Montserrat', sans-serif;
+    backdrop-filter: blur(5px);
+}
+
+.quiz-option-btn:hover {
+    background: rgba(53, 53, 53, 0.12);
+    border-color: rgba(243, 243, 243, 0.5);
+    transform: translateX(5px);
+    box-shadow: 0 4px 15px rgba(237, 238, 238, 0.15);
+    color: lab(100% 0.01 -0.01);
+}
+
+.quiz-actions {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+    margin-top: 20px;
+}
+
+.quiz-btn {
+    padding: 15px 30px;
+    border-radius: 12px;
+    font-size: 1.1rem;
+    font-weight: 600;
+    cursor: pointer;
+    border: none;
+    transition: transform 0.2s, box-shadow 0.2s;
+    font-family: 'Montserrat', sans-serif;
+    letter-spacing: 0.5px;
+}
+
+.quiz-btn.primary {
+    background: linear-gradient(
+        135deg,
+        #888888 0%,
+        #cecece 40%,
+        #858586 70%,
+        #7b7b7c 100%
+    );
+    color: #1a1a1f;
+    font-weight: 700;
+    box-shadow: 0 4px 20px rgba(198, 218, 216, 0.3);
+}
+
+.quiz-btn.primary:hover {
+    transform: translateY(-2px);
+    box-shadow: 
+        0 8px 25px rgba(235, 238, 238, 0.4),
+        0 0 30px rgba(200, 168, 255, 0.2);
+}
+
+.quiz-btn.secondary {
+    background: transparent;
+    color: #525257;
+    border: 1px solid rgba(176, 176, 190, 0.3);
+}
+
+.quiz-btn.secondary:hover {
+    border-color: rgba(124, 126, 126, 0.6);
+    color: #2d2d2e;
+    background: rgba(54, 54, 54, 0.08);
+}
+
+
+.highlight {
+    background: linear-gradient(
+        90deg,
+        #616060 0%,
+        #636057 35%,
+        #666674 65%,
+        #323238 100%
+    );
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    font-weight: 700;
+    filter: drop-shadow(0 0 8px rgba(95, 95, 95, 0.3));
+    box-shadow: #292929;
+}
+
+
+@media (max-width: 600px) {
+    .quiz-container {
+        padding: 25px 20px;
+    }
+    .quiz-container h2 {
+        font-size: 1.4rem;
+    }
+    .quiz-icon {
+        font-size: 3rem;
+    }
+}
+</style>
+<div id="container">
+
+    <button class="burger-btn" onclick="toggleMenu()">☰</button>
+
+    <nav id="navig" class="sidebar">
+        
+        <div class="sidebar-header">
+            <a href="PLAYMUZ.HTML">
+                <img src="playmmuzlogo.png" alt="PlayMuz">
+            </a>
+        </div>
+
+        <div class="sidebar-menu">
+            <a href="PLAYMUZ.HTML" class="nav-link">
+                <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>
+                    <polyline points="9 22 9 12 15 12 15 22"/>
+                </svg>
+                <span>Главная</span>
+            </a>
+           <a href="RECOMMENDATIONS.html" class="nav-link">
+                <svg class="nav-icon" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-6">
+                     <path stroke-linecap="round" stroke-linejoin="round" d="M11.48 3.499a.562.562 0 0 1 1.04 0l2.125 5.111a.563.563 0 0 0 .475.345l5.518.442c.499.04.701.663.321.988l-4.204 3.602a.563.563 0 0 0-.182.557l1.285 5.385a.562.562 0 0 1-.84.61l-4.725-2.885a.562.562 0 0 0-.586 0L6.982 20.54a.562.562 0 0 1-.84-.61l1.285-5.386a.562.562 0 0 0-.182-.557l-4.204-3.602a.562.562 0 0 1 .321-.988l5.518-.442a.563.563 0 0 0 .475-.345L11.48 3.5Z" />
+                    </svg>
+                <span>Рекомендации</span>
+            </a>
+            <div class="nav-dropdown-wrapper">
+    
+    <a href="GENRES.html" class="nav-link">
+        <svg class="nav-icon" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-6">
+         <path stroke-linecap="round" stroke-linejoin="round" d="m9 9 10.5-3m0 6.553v3.75a2.25 2.25 0 0 1-1.632 2.163l-1.32.377a1.803 1.803 0 1 1-.99-3.467l2.31-.66a2.25 2.25 0 0 0 1.632-2.163Zm0 0V2.25L9 5.25v10.303m0 0v3.75a2.25 2.25 0 0 1-1.632 2.163l-1.32.377a1.803 1.803 0 1 1-.99-3.467l2.31-.66A2.25 2.25 0 0 0 9 15.553Z" />
+        </svg>
+        <span>Жанры</span>
+    </a> 
+    <ul class="nav-submenu">
+        <li><a href="MUSIC.html#metal">Метал</a></li>
+        <li><a href="MUSIC.html#pop">Поп</a></li>
+        <li><a href="MUSIC.html#alternative">Альтернативная</a></li>
+        <li><a href="MUSIC.html#electronic">Электронная</a></li>
+        <li><a href="MUSIC.html#rock">Рок</a></li>
+        <li><a href="MUSIC.html#classical">Классика</a></li>
+         <li><a href="MUSIC.html#indie">Инди</a></li>
+    </ul>
+</div>
+            <a href="POPULAR.html" class="nav-link">
+                <svg class="nav-icon" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-6">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M15.362 5.214A8.252 8.252 0 0 1 12 21 8.25 8.25 0 0 1 6.038 7.047 8.287 8.287 0 0 0 9 9.601a8.983 8.983 0 0 1 3.361-6.867 8.21 8.21 0 0 0 3 2.48Z" />
+                <path stroke-linecap="round" stroke-linejoin="round" d="M12 18a3.75 3.75 0 0 0 .495-7.468 5.99 5.99 0 0 0-1.925 3.547 5.975 5.975 0 0 1-2.133-1.001A3.75 3.75 0 0 0 12 18Z" />
+                </svg>
+              <span>Видео-плейлисты</span>
+                  </a>
+            <a href="FAVORITE.html" class="nav-link">
+                <svg class="nav-icon" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-6">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M21 8.25c0-2.485-2.099-4.5-4.688-4.5-1.935 0-3.597 1.126-4.312 2.733-.715-1.607-2.377-2.733-4.313-2.733C5.1 3.75 3 5.765 3 8.25c0 7.22 9 12 9 12s9-4.78 9-12Z" />
+                    </svg>
+                <span>Избранное</span>
+            </a>
+            <a href="ABOUT.html" class="nav-link">
+                <svg class="nav-icon" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-6">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M9.879 7.519c1.171-1.025 3.071-1.025 4.242 0 1.172 1.025 1.172 2.687 0 3.712-.203.179-.43.326-.67.442-.745.361-1.45.999-1.45 1.827v.75M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Zm-9 5.25h.008v.008H12v-.008Z" />
+                  </svg>
+
+                <span>О проекте</span>
+            </a>
+            <a href="TEST.html" class="nav-link active">
+                <svg class="nav-icon" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-6">
+  <path stroke-linecap="round" stroke-linejoin="round" d="M12 18v-5.25m0 0a6.01 6.01 0 0 0 1.5-.189m-1.5.189a6.01 6.01 0 0 1-1.5-.189m3.75 7.478a12.06 12.06 0 0 1-4.5 0m3.75 2.383a14.406 14.406 0 0 1-3 0M14.25 18v-.192c0-.983.658-1.823 1.508-2.316a7.5 7.5 0 1 0-7.517 0c.85.493 1.509 1.333 1.509 2.316V18" />
+</svg>
+                <span>Тест</span>
+            </a>
+             <a href="LOGIN.html" class="nav-link">
+                <span>Вход</span>
+            </a>
+
+             <a href="REGISTER.html" class="nav-link">
+                <span>Регистрация</span>
+             </a>
+        </div>
+
+        <div style="text-align: center; font-style: italic; font-size: 20px; color: #000000a4;">@PlayMuz 2026</div> 
+    </nav>    
+
+
+<main class="main-content quiz-page">
+    <div class="quiz-container">
+
+        <div id="quiz-start" class="quiz-screen active">
+            <div class="quiz-icon">🎧</div>
+            <h2>Какой твой жанр?</h2>
+            <p>Пройди короткий тест из 4 вопросов</p>
+            <button class="quiz-btn primary" onclick="startQuiz()">Начать тест</button>
+        </div>
+
+        
+        <div id="quiz-question" class="quiz-screen">
+            <div class="quiz-progress">
+                <div class="quiz-progress-bar" id="progress-bar"></div>
+            </div>
+            <h3 id="question-text">Текст вопроса</h3> <br>
+            <div class="quiz-options" id="quiz-options">
+               
+            </div>
+        </div>
+
+        <div id="quiz-result" class="quiz-screen">
+            <div class="quiz-icon" id="result-icon">🎵</div>
+            <h2>Твой жанр: <span id="result-genre" class="highlight">Жанр</span></h2>
+            <p id="result-desc">Описание результата.</p>
+            <div class="quiz-actions">
+                <button class="quiz-btn primary" onclick="goToPlaylist()">Слушать плейлист</button>
+                <button class="quiz-btn secondary" onclick="restartQuiz()">Пройти заново</button>
+            </div>
+        </div>
+    </div>
+</main>
+</div>
+</div>
+<script>
+
+const quizData = {
+    questions: [
+        {
+            text: "Как ты обычно проводишь свободное время?",
+            options: [
+                { text: "Ищу что-нибудь интересное, чтобы зарядиться энергией.", genre: "pop" },
+                { text: "Слушаю музыку и погружаюсь в собственные мысли.", genre: "indie" },
+                { text: "Играю, смотрю что-нибудь или изучаю новые технологии.", genre: "electronic" },
+                { text: "Ищу вдохновение в искусстве, книгах и классических произведениях.", genre: "classical" },
+                { text: "Предпочитаю активный отдых и яркие впечатления.", genre: "rock" }
+            ]
+        },
+        {
+            text: "Представь, что ты выбираешь музыку для долгой поездки. Что включишь?",
+            options: [
+                { text: "Что-нибудь популярное, чтобы подпевать всю дорогу.", genre: "pop" },
+                { text: "Меланхоличные песни для размышлений.", genre: "indie" },
+                { text: "Энергичные электронные биты и синтезаторы.", genre: "electronic" },
+                { text: "Красивые инструментальные композиции.", genre: "classical" },
+                { text: "Мощные гитарные риффы на полную громкость.", genre: "rock" }
+            ]
+        },
+        {
+            text: "Какое настроение ты чаще всего ищешь в музыке?",
+            options: [
+                { text: "Лёгкость, радость и желание двигаться.", genre: "pop" },
+                { text: "Уютную грусть и немного ностальгии.", genre: "indie" },
+                { text: "Атмосферу другого мира и космическое звучание.", genre: "electronic" },
+                { text: "Гармонию, красоту и эмоциональную глубину.", genre: "classical" },
+                { text: "Свободу, драйв и желание перевернуть весь мир.", genre: "rock" }
+            ]
+        },
+        {
+            text: "Что для тебя важнее всего в музыкальной композиции?",
+            options: [
+                { text: "Запоминающаяся мелодия и яркий припев.", genre: "pop" },
+                { text: "Искренний текст и необычная атмосфера.", genre: "indie" },
+                { text: "Ритм, звучание и интересные эффекты.", genre: "electronic" },
+                { text: "Сложность композиции и мастерство исполнения.", genre: "classical" },
+                { text: "Энергия инструментов и выразительный вокал.", genre: "rock" }
+            ]
+        },
+        {
+            text: "Выбери место, в котором тебе хотелось бы оказаться прямо сейчас.",
+            options: [
+                { text: "На огромном концерте, где весь зал поёт вместе.", genre: "pop" },
+                { text: "В маленьком уютном кафе под дождём.", genre: "indie" },
+                { text: "На ночном фестивале с неоновыми огнями.", genre: "electronic" },
+                { text: "В старинном концертном зале с живым оркестром.", genre: "classical" },
+                { text: "На рок-фестивале среди тысяч поклонников.", genre: "rock" }
+            ]
+        }
+    ],
+
+    results: {
+        pop: {
+            icon: "",
+            genre: "Поп-музыка (Pop)",
+            desc: "Ты ценишь яркие эмоции, запоминающиеся мелодии и атмосферу праздника. Тебе нравится музыка, которая легко поднимает настроение и заряжает энергией. Главный герой музыкального клипа — определённо ты.",
+            playlistLink: "MUSIC.html#pop"
+        },
+
+        rock: {
+            icon: "",
+            genre: "Рок (Rock)",
+            desc: "Ты любишь выразительное звучание, мощные инструменты и свободу самовыражения. Тебе по душе музыка с характером, которая не боится быть громкой и эмоциональной. Внутри тебя определённо живёт немного бунтарства.",
+            playlistLink: "MUSIC.html#rock"
+        },
+
+        classical: {
+            icon: "",
+            genre: "Классическая музыка (Classical)",
+            desc: "Ты ценишь гармонию, детали и красоту музыкальных произведений. Тебе интересно открывать для себя сложные композиции и замечать то, что другие могут упустить. Возможно, ты просто родился не в той музыкальной эпохе.",
+            playlistLink: "MUSIC.html#classical"
+        },
+
+        indie: {
+            icon: "",
+            genre: "Инди и альтернатива (Indie)",
+            desc: "Ты ценишь самобытность, атмосферу и искренность. Тебе нравится находить необычные композиции, которые словно рассказывают личную историю. Иногда одна песня способна передать больше, чем целый разговор.",
+            playlistLink: "MUSIC.html#indie"
+        },
+
+        electronic: {
+            icon: "",
+            genre: "Электронная музыка (EDM)",
+            desc: "Тебя привлекают эксперименты со звуком, необычные ритмы и футуристичная атмосфера. Ты любишь музыку, которая переносит в совершенно другое пространство. Где-то на фоне уже играет синтезатор из 2000-х.",
+            playlistLink: "MUSIC.html#electronic"
+        }
+    }
+};
+
+
+    let currentQuestion = 0;
+    let scores = { pop: 0, rock: 0, classical: 0, indie: 0, electronic: 0 };
+
+    function startQuiz() {
+        document.getElementById('quiz-start').classList.remove('active');
+        document.getElementById('quiz-question').classList.add('active');
+        currentQuestion = 0;
+        scores = { pop: 0, rock: 0, classical: 0, indie: 0, electronic: 0 };
+        showQuestion();
+    }
+
+    function showQuestion() {
+        const q = quizData.questions[currentQuestion];
+        document.getElementById('question-text').innerText = q.text;
+        
+
+        const progress = ((currentQuestion) / quizData.questions.length) * 100;
+        document.getElementById('progress-bar').style.width = progress + '%';
+
+        const optionsContainer = document.getElementById('quiz-options');
+        optionsContainer.innerHTML = ''; 
+
+        q.options.forEach(option => {
+            const btn = document.createElement('button');
+            btn.className = 'quiz-option-btn';
+            btn.innerText = option.text;
+            btn.onclick = () => selectAnswer(option.genre);
+            optionsContainer.appendChild(btn);
+        });
+    }
+
+    function selectAnswer(genre) {
+        scores[genre]++;
+        currentQuestion++;
+
+        if (currentQuestion < quizData.questions.length) {
+            showQuestion();
+        } else {
+            showResult();
+        }
+    }
+
+    function showResult() {
+        document.getElementById('quiz-question').classList.remove('active');
+        document.getElementById('quiz-result').classList.add('active');
+        document.getElementById('progress-bar').style.width = '100%';
+
+
+        let maxScore = 0;
+        let resultGenre = 'pop'; 
+
+        for (const [genre, score] of Object.entries(scores)) {
+            if (score > maxScore) {
+                maxScore = score;
+                resultGenre = genre;
+            }
+        }
+
+        const resultData = quizData.results[resultGenre];
+        document.getElementById('result-icon').innerText = resultData.icon;
+        document.getElementById('result-genre').innerText = resultData.genre;
+        document.getElementById('result-desc').innerText = resultData.desc;
+
+        document.getElementById('quiz-result').dataset.link = resultData.playlistLink;
+    }
+
+    function goToPlaylist() {
+        const link = document.getElementById('quiz-result').dataset.link;
+        window.location.href = link; 
+    }
+
+    function restartQuiz() {
+        document.getElementById('quiz-result').classList.remove('active');
+        document.getElementById('quiz-start').classList.add('active');
+    }
+</script>
+<script>
+function toggleMenu() {
+    document.getElementById('navig').classList.toggle('open');
+}
+</script>
+</body>
+</html>
